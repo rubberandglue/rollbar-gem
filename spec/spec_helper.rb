@@ -15,9 +15,8 @@ end
 
 require 'rubygems'
 
-ENV['RAILS_ENV'] = ENV['RACK_ENV'] = 'test'
-require File.expand_path('../dummyapp/config/environment', __FILE__)
-require 'rspec/rails'
+ENV['RACK_ENV'] = 'test'
+
 require 'database_cleaner'
 
 begin
@@ -26,19 +25,10 @@ begin
 rescue LoadError
 end
 
-namespace :dummy do
-  load 'spec/dummyapp/Rakefile'
-end
 
 if ENV['TRAVIS_JDK_VERSION'] == 'oraclejdk7'
   require 'rollbar/configuration'
   Rollbar::Configuration::DEFAULT_ENDPOINT = 'https://api-alt.rollbar.com/api/1/item/'
-end
-
-if Gem::Version.new(Rails.version) < Gem::Version.new('5.0')
-  Rake::Task['dummy:db:setup'].invoke
-else
-  Rake::Task['dummy:db:test:prepare'].invoke
 end
 
 
@@ -53,7 +43,7 @@ RSpec.configure do |config|
   config.color = true
   config.formatter = 'documentation'
 
-  config.use_transactional_fixtures = true
+
   config.order = 'random'
   config.expect_with(:rspec) do |c|
     c.syntax = [:should, :expect]

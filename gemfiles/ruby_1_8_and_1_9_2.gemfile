@@ -9,9 +9,8 @@ gem 'activerecord-jdbcsqlite3-adapter', :platform => :jruby
 gem 'celluloid', '< 0.17.0' if RUBY_VERSION == '1.9.2'
 gem 'hitimes', '< 1.2.2'
 gem 'jruby-openssl', :platform => :jruby
-gem 'rails', '3.0.20'
 gem 'rake', '< 11'
-gem 'rspec-rails', '>= 2.14.0'
+gem 'rspec', '>= 2.14.0'
 gem 'sqlite3', :platform => [:ruby, :mswin, :mingw]
 
 gem 'oj', '~> 2.12.14' unless is_jruby

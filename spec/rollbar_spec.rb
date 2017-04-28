@@ -430,7 +430,7 @@ describe Rollbar do
     end
 
     context 'report' do
-      let(:logger_mock) { double("Rails.logger").as_null_object }
+      let(:logger_mock) { double("Logger.new(STDERR)").as_null_object }
 
       before(:each) do
         configure
@@ -480,7 +480,7 @@ describe Rollbar do
       end
     end
 
-    let(:logger_mock) { double("Rails.logger").as_null_object }
+    let(:logger_mock) { double("Logger.new(STDERR)").as_null_object }
     let(:user) { User.create(:email => 'email@example.com', :encrypted_password => '', :created_at => Time.now, :updated_at => Time.now) }
 
     before do
@@ -772,7 +772,7 @@ describe Rollbar do
       end
     end
 
-    let(:logger_mock) { double("Rails.logger").as_null_object }
+    let(:logger_mock) { double("Logger.new(STDERR)").as_null_object }
     let(:user) { User.create(:email => 'email@example.com', :encrypted_password => '', :created_at => Time.now, :updated_at => Time.now) }
 
     it 'should report simple messages' do
@@ -811,18 +811,6 @@ describe Rollbar do
       logger_mock.should_receive(:error).with(/\[Rollbar\] Reporting internal error encountered while sending data to Rollbar./)
 
       Rollbar.error("Test message with circular extra data", a)
-    end
-
-    it 'should be able to report form validation errors when they are present' do
-      logger_mock.should_receive(:info).with('[Rollbar] Success')
-      user.errors.add(:example, "error")
-      user.report_validation_errors_to_rollbar
-    end
-
-    it 'should not report form validation errors when they are not present' do
-      logger_mock.should_not_receive(:info).with('[Rollbar] Success')
-      user.errors.clear
-      user.report_validation_errors_to_rollbar
     end
 
     it 'should report messages with extra data' do
@@ -884,7 +872,7 @@ describe Rollbar do
       end
     end
 
-    let(:logger_mock) { double("Rails.logger").as_null_object }
+    let(:logger_mock) { double("Logger.new(STDERR)").as_null_object }
 
     it 'should send the payload over the network by default' do
       logger_mock.should_not_receive(:info).with('[Rollbar] Writing payload to file')
@@ -938,7 +926,7 @@ describe Rollbar do
       end
     end
 
-    let(:logger_mock) { double("Rails.logger").as_null_object }
+    let(:logger_mock) { double("Logger.new(STDERR)").as_null_object }
 
     it 'should send the payload using the default asynchronous handler girl_friday' do
       logger_mock.should_receive(:info).with('[Rollbar] Scheduling item')
@@ -1113,12 +1101,6 @@ describe Rollbar do
       reset_configuration
     end
 
-    it 'should have use the Rails logger when configured to do so' do
-      configure
-      expect(Rollbar.send(:logger)).to be_kind_of(Rollbar::LoggerProxy)
-      expect(Rollbar.send(:logger).object).to eq ::Rails.logger
-    end
-
     it 'should use the default_logger when no logger is set' do
       logger = Logger.new(STDERR)
 
@@ -1140,7 +1122,7 @@ describe Rollbar do
 
   context "project_gems" do
     it "should include gem paths for specified project gems in the payload" do
-      gems = ['rack', 'rspec-rails']
+      gems = ['rack', 'rspec']
       gem_paths = []
 
       Rollbar.configure do |config|
@@ -1173,7 +1155,7 @@ describe Rollbar do
       gem_paths.length.should > 1
 
       gem_paths.any?{|path| path.include? 'rollbar-gem'}.should == true
-      gem_paths.any?{|path| path.include? 'rspec-rails'}.should == true
+      gem_paths.any?{|path| path.include? 'rspec'}.should == true
 
       data = notifier.send(:build_item, 'info', 'test', nil, {})['data']
       data[:project_package_paths].kind_of?(Array).should == true
@@ -1274,7 +1256,7 @@ describe Rollbar do
     let(:context_proc) { proc {} }
     let(:scoped_notifier) { notifier.scope(:context => context_proc) }
     let(:exception) { Exception.new }
-    let(:logger_mock) { double("Rails.logger").as_null_object }
+    let(:logger_mock) { double("Logger.new(STDERR)").as_null_object }
 
     it 'reports successfully' do
       configure

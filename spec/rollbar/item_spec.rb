@@ -177,7 +177,7 @@ describe Rollbar::Item do
 
     it 'should include project_gem_paths' do
       gems = Gem::Specification.map(&:name)
-      project_gems = ['rails']
+      project_gems = []
       project_gems << 'rspec' if gems.include?('rspec')
       project_gems << 'rspec-core' if gems.include?('rspec-core')
 

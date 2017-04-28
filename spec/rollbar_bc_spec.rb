@@ -14,7 +14,7 @@ describe Rollbar do
       end
     end
 
-    let(:logger_mock) { double('Rails.logger').as_null_object }
+    let(:logger_mock) { double('Logger.new(STDERR)').as_null_object }
     let(:user) do
       User.create(:email => 'email@example.com',
                   :encrypted_password => '',
@@ -55,18 +55,6 @@ describe Rollbar do
 
       Rollbar.report_message('Test message with circular extra data', 'debug', a)
     end
-
-    it 'should be able to report form validation errors when they are present' do
-      logger_mock.should_receive(:info).with('[Rollbar] Success')
-      user.errors.add(:example, 'error')
-      user.report_validation_errors_to_rollbar
-    end
-
-    it 'should not report form validation errors when they are not present' do
-      logger_mock.should_not_receive(:info).with('[Rollbar] Success')
-      user.errors.clear
-      user.report_validation_errors_to_rollbar
-    end
   end
 
   context 'bc_report_message_with_request' do
@@ -82,7 +70,7 @@ describe Rollbar do
       configure
     end
 
-    let(:logger_mock) { double('Rails.logger').as_null_object }
+    let(:logger_mock) { double('Logger.new(STDERR)').as_null_object }
     let(:user) { User.create(:email => 'email@example.com', :encrypted_password => '', :created_at => Time.now, :updated_at => Time.now) }
 
     it 'should report simple messages' do
@@ -141,7 +129,7 @@ describe Rollbar do
       configure
     end
 
-    let(:logger_mock) { double('Rails.logger').as_null_object }
+    let(:logger_mock) { double('Logger.new(STDERR)').as_null_object }
 
     it 'should report exceptions without person or request data' do
       logger_mock.should_receive(:info).with('[Rollbar] Success')

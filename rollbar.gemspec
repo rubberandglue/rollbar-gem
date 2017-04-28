@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.authors       = ["Rollbar, Inc."]
   gem.email         = ["support@rollbar.com"]
   gem.description   = %q{Easy and powerful exception tracking for Ruby}
-  gem.executables   = ['rollbar-rails-runner']
+  gem.executables   = ['']
   gem.summary       = %q{Reports exceptions to Rollbar}
   gem.homepage      = "https://rollbar.com"
   gem.license       = 'MIT'

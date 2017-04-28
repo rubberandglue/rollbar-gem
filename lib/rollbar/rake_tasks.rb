@@ -8,20 +8,8 @@ require 'logger'
 namespace :rollbar do
   desc 'Verify your gem installation by sending a test exception to Rollbar'
   task :test => [:environment] do
-    if defined?(Rails)
-      Rails.logger = if defined?(ActiveSupport::TaggedLogging)
-                       ActiveSupport::TaggedLogging.new(Logger.new(STDOUT))
-                     else
-                       Logger.new(STDOUT)
-                     end
-
-      Rails.logger.level = Logger::DEBUG
-      Rollbar.preconfigure do |config|
-        config.logger = Rails.logger
-      end
+    class RollbarTestingException < RuntimeError;
     end
-
-    class RollbarTestingException < RuntimeError; end
 
     unless Rollbar.configuration.access_token
       puts 'Rollbar needs an access token configured. Check the README for instructions.'
@@ -32,8 +20,7 @@ namespace :rollbar do
     puts 'Testing manual report...'
     Rollbar.error('Test error from rollbar:test')
 
-    # Module to inject into the Rails controllers or
-    # rack apps
+    # Module to inject into rack apps
     module RollbarTest
       def test_rollbar
         puts 'Raising RollbarTestingException to simulate app failure.'
@@ -43,46 +30,17 @@ namespace :rollbar do
     end
 
     if defined?(Rack::MockRequest)
-      if defined?(Rails)
-        puts 'Setting up the controller.'
+      protocol = 'http'
+      app      = Class.new do
+        include RollbarTest
 
-        class RollbarTestController < ActionController::Base
-          include RollbarTest
-
-          def verify
-            test_rollbar
-          end
-
-          def logger
-            nil
-          end
-        end
-
-        Rails.application.routes_reloader.execute_if_updated
-        Rails.application.routes.draw do
-          get 'verify' => 'rollbar_test#verify', :as => 'verify'
-        end
-
-        # from http://stackoverflow.com/questions/5270835/authlogic-activation-problems
-        if defined? Authlogic
-          Authlogic::Session::Base.controller = Authlogic::ControllerAdapters::RailsAdapter.new(self)
-        end
-
-        protocol = (defined? Rails.application.config.force_ssl && Rails.application.config.force_ssl) ? 'https' : 'http'
-        app = Rails.application
-      else
-        protocol = 'http'
-        app = Class.new do
-          include RollbarTest
-
-          def self.call(_env)
-            new.test_rollbar
-          end
+        def self.call(_env)
+          new.test_rollbar
         end
       end
 
       puts 'Processing...'
-      env = Rack::MockRequest.env_for("#{protocol}://www.example.com/verify")
+      env     = Rack::MockRequest.env_for("#{protocol}://www.example.com/verify")
       status, = app.call(env)
 
       unless status.to_i == 500
